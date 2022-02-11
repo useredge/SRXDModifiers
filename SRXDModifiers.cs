@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using BepInEx.Configuration;
 using UnityEngine;
 using HarmonyLib;
@@ -94,16 +94,33 @@ namespace SRXDModifiers
 
             public static void updatePlaybackSpeed(double value)
             {
-                if (Track.Instance == null) return;
 
-                Track.Instance.ChangePitch(value);
-                current = value;
+                if (Track.Instance != null)
+                {
+
+                    Track.Instance.ChangePitch(value);
+                    current = value;
+
+                }
+                
             }
+
+            [HarmonyPostfix]
+            [HarmonyPatch(typeof(Track), nameof(Track.RestartTrack))]
+            [HarmonyPatch(typeof(Track), nameof(Track.PlayTrack))]
+            [HarmonyPatch(typeof(XDCustomLevelSelectMenu), nameof(XDCustomLevelSelectMenu.OpenMenu))]
+            private static void multiple_Track_Postfix()
+            {
+                updatePlaybackSpeed(current);
+            }
+
+
 
         }
 
         public class AutoPlay
         {
+
             public static MainCamera cameraInstance;
             public static bool enabled = false;
             public static bool bgViewMode = false;
